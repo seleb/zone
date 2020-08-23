@@ -204,7 +204,6 @@ export class ZoneSceneRenderer extends EventEmitter {
         private readonly client: ZoneClient,
         private readonly zone: ZoneState,
         private readonly getTile: (base64: string | undefined) => CanvasRenderingContext2D,
-        private readonly connecting: () => boolean,
     ) {
         super();
 
@@ -295,9 +294,7 @@ export class ZoneSceneRenderer extends EventEmitter {
             const erase = this.buildBlock === 0 && info.blockCoords;
 
             if (this.building && erase && info.blockCoords) {
-                client.setBlock(info.blockCoords, this.buildBlock);
             } else if (this.building && info.spaceCoords) {
-                client.setBlock(info.spaceCoords, this.buildBlock);
             } else {
                 this.emit('pointerdown', info);
             }
@@ -374,6 +371,7 @@ export class ZoneSceneRenderer extends EventEmitter {
             if (block && !this.coordsToCube.has(coord)) {
                 const cube = new THREE.Mesh(blockGeometries[block].geometry, blockMaterial);
                 chunk.add(cube);
+                cube.visible = true;
                 const [x, y, z] = coord;
                 cube.position.set(x / 16, y / 16, z / 16);
                 this.cubeToCoords.set(cube, coord);
@@ -384,14 +382,13 @@ export class ZoneSceneRenderer extends EventEmitter {
                 this.cubeToCoords.delete(mesh);
                 this.coordsToCube.delete(coord);
             }
+
+            chunk.visible = true;
         });
     }
 
     update() {
         const localCoords = this.client.localUser?.position;
-        if (localCoords) {
-            this.setVisibility(localCoords, 2);
-        }
         if (localCoords && this.follow) {
             const [x, y, z] = localCoords;
             this.followCam.focus.set(x / 16, y / 16, z / 16);
@@ -414,7 +411,7 @@ export class ZoneSceneRenderer extends EventEmitter {
             this.followCam.depth,
         );
 
-        this.renderer.setClearColor(this.connecting() ? red : black);
+        this.renderer.setClearColor(black);
         this.mediaTexture.image = this.mediaElement;
         this.mediaTexture.needsUpdate = true;
 
@@ -437,7 +434,7 @@ export class ZoneSceneRenderer extends EventEmitter {
 
         const showAvatar = (user: UserState, echo = false) => {
             const mesh = avatarMeshes[i++];
-            mesh.visible = !!user.position && this.areCoordsVisible(user.position);
+            mesh.visible = true; //!!user.position && this.areCoordsVisible(user.position);
             if (!user.position || !this.areCoordsVisible(user.position)) return;
             const [x, y, z] = user.position;
 
