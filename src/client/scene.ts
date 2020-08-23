@@ -435,7 +435,7 @@ export class ZoneSceneRenderer extends EventEmitter {
         const showAvatar = (user: UserState, echo = false) => {
             const mesh = avatarMeshes[i++];
             mesh.visible = true; //!!user.position && this.areCoordsVisible(user.position);
-            if (!user.position || !this.areCoordsVisible(user.position)) return;
+            //if (!user.position || !this.areCoordsVisible(user.position)) return;
             const [x, y, z] = user.position;
 
             let [dy, dx] = [0, 0];
